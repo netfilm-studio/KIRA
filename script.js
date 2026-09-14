@@ -515,12 +515,13 @@ function buildEpisodesGrid() {
     d.className = 'eps-big-card';
     d.id = 'eps-big-' + i;
     d.innerHTML = `
-      <img class="eps-big-img" src="${ep.thumb}" alt="${ep.title}"/>
+      <img class="eps-big-img" alt="${ep.title}"/>
       <div class="eps-big-info">
         <div class="eps-big-num">Эпизод ${ep.num}</div>
         <div class="eps-big-title">${ep.title}</div>
         <div class="eps-big-desc">${ep.blurb || ''}</div>
       </div>`;
+    setImageWithFallback(d.querySelector('.eps-big-img'), ep.thumb);
     d.addEventListener('click', () => {
       closeEpisodes();
       setTimeout(() => playEp(i), 300);
@@ -558,13 +559,14 @@ function buildEps() {
     d.className = 'ep-card';
     d.innerHTML = `
       <div style="position:relative;">
-        <img class="ep-img" src="${ep.thumb}" alt="${ep.title}"/>
+        <img class="ep-img" alt="${ep.title}"/>
         <div class="ep-num-tag">Эп. ${ep.num}</div>
       </div>
       <div class="ep-info">
         <div class="ep-name">${ep.title}</div>
         <div class="ep-dur">Эпизод ${ep.num}</div>
       </div>`;
+    setImageWithFallback(d.querySelector('.ep-img'), ep.thumb);
     let clicking = false;
     d.addEventListener('click', () => {
       if (clicking) return;
@@ -862,7 +864,8 @@ function playEp(i) {
   showEpIntro(i, () => {
     cur = i;
     const ep = eps[i];
-    document.getElementById('pl-bg').style.backgroundImage = `url('${ep.bg}')`;
+    document.getElementById('pl-bg').style.backgroundImage = '';
+    setBgWithFallback(document.getElementById('pl-bg'), ep.bg);
     document.getElementById('pl-fs-title').textContent = ep.title;
     document.getElementById('pl-fs-sub').textContent = `Эпизод ${ep.num} · ${КЛИЕНТ.он} & ${КЛИЕНТ.она}`;
     document.getElementById('pl-ep-badge').textContent = `Эп. ${ep.num}`;
@@ -1721,7 +1724,7 @@ function openProfile() {
   
   // Установить обложку "Продолжить смотреть" из первого эпизода
   if (thumb && eps[0] && eps[0].thumb) {
-    thumb.style.backgroundImage = `url('${eps[0].thumb}')`;
+    setBgWithFallback(thumb, eps[0].thumb);
   }
   
   // Обновим счётчики stats с реальными данными
@@ -1807,9 +1810,10 @@ function initAll() {
   // Init credits photos — ровно по числу реальных эпизодов, без пустых кружков
   const crPhotos = document.getElementById('cr-photos');
   if (crPhotos && КЛИЕНТ.эпизоды) {
-    crPhotos.innerHTML = КЛИЕНТ.эпизоды.map(ep =>
-      `<img src="${ep.обложка}" alt="${ep.номер}"/>`
-    ).join('');
+    crPhotos.innerHTML = КЛИЕНТ.эпизоды.map(ep => `<img alt="${ep.номер}"/>`).join('');
+    crPhotos.querySelectorAll('img').forEach((img, i) => {
+      setImageWithFallback(img, КЛИЕНТ.эпизоды[i].обложка);
+    });
   }
 }
 if (document.readyState === 'loading') {
